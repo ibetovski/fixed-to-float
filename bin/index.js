@@ -10,8 +10,8 @@ if (process.argv.length <= 3) {
   throw Error('Please enter source and destination files');
 }
 
-var fileToRead = process.argv[2];
-var fileToSave = process.argv[3];
+var sourceFile = process.argv[2];
+var destinationFile = process.argv[3];
 
 var convertors = {
 	width: function(property, value) {
@@ -39,7 +39,7 @@ var functionsToConvert = {
 	bottom: 'height'
 }
 
-fs.readFile(fileToRead, {encoding: "UTF8"}, function (err, data) {
+fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
   if (err) throw err;
 
   // we have the css data.
@@ -64,11 +64,10 @@ fs.readFile(fileToRead, {encoding: "UTF8"}, function (err, data) {
   	return convertors[functionsToConvert[property]](property, value);
   });
 
-  fs.writeFile(fileToSave, changedCSS, function (err) {
-	  if (err) throw err;
-	  console.log('It\'s saved!');
-	});
-  // console.log('changed:', changedCSS)
+  fs.writeFile(destinationFile, changedCSS, function (err) {
+   if (err) throw err;
+   console.log('Done!', destinationFile + ' was created');
+ });
   
 
 });
