@@ -1,0 +1,29 @@
+{
+  "name": "fixed-to-float",
+  "version": "0.0.1",
+  "description": "Convert your fixed layout CSS from pixels to percents",
+  "main": "convertToPercent.js",
+  "bin": {
+    "fixed-to-float": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibetovski/fixed-to-float.git"
+  },
+  "keywords": [
+    "CSS",
+    "fixed",
+    "percents",
+    "converter"
+  ],
+  "author": "Iliyan Betovski",
+  "preferGlobal": true,
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ibetovski/fixed-to-float/issues"
+  },
+  "homepage": "https://github.com/ibetovski/fixed-to-float#readme"
+}

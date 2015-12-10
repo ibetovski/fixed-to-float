@@ -1,11 +1,17 @@
+#! /usr/bin/env node
+
 var fs = require('fs');
 
 // put here the screen dimensions.
 var screenWidth = 800;
 var screenHeight = 1280;
 
-var fileToRead = 'htmlcss/style.css';
-var fileToSave = 'htmlcss/style_coverted.css';
+if (process.argv.length <= 3) {
+  throw Error('Please enter source and destination files');
+}
+
+var fileToRead = process.argv[2];
+var fileToSave = process.argv[3];
 
 var convertors = {
 	width: function(property, value) {
