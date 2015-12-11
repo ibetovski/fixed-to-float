@@ -44,10 +44,10 @@ This will create file `css_float.css` with content:
 ```css
 div {
   width: 12.5%;
-  margin-left:  2.5%;
-  margin-right: 3.75%;
-  top: 23.4375%;
-  height:  31.25%;
+  margin-left: 20px;
+  margin-right: 30px;
+  top: 23.438%;
+  height: 31.25%;
 }
 ```
 
