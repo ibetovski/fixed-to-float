@@ -29,6 +29,8 @@
   },
   "homepage": "https://github.com/ibetovski/fixed-to-float#readme",
   "dependencies": {
+    "colors": "^1.1.2",
+    "logme": "^0.4.0",
     "prompt": "^0.2.14"
   }
 }

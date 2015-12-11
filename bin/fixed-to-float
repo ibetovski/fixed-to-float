@@ -2,6 +2,11 @@
 
 var fs = require('fs');
 var prompt = require('prompt');
+var colors = require('colors');
+var Logme = require('logme').Logme;
+var logme = new Logme({
+  theme: 'socket.io'
+});
 
 // put here the screen dimensions.
 var device = {
@@ -47,6 +52,20 @@ prompt.get(promptQuestions, function(err, results) {
   init();
 });
 
+var whiteList = [
+  'width',
+  'left',
+  'right',
+  'height',
+  'top',
+  'bottom',
+  'margin-top',
+  'margin-left',
+  'padding-top',
+  'padding-left',
+  'padding-bottom',
+];
+
 
 var sourceFile = process.argv[2];
 var destinationFile = process.argv[3];
@@ -62,7 +81,17 @@ var functionsToConvert = {
 };
 
 convert = function(property, value) {
-  var deviceProperty = functionsToConvert[property]
+  // if the property is not in the list with functions
+  //  we check if it contains X or Y names in its name
+  if (typeof functionsToConvert[property] === 'undefined') {
+    property = property
+                .replace(/([\w-]+)left/, 'left')
+                .replace(/([\w-]+)right/, 'right')
+                .replace(/([\w-]+)top/, 'top')
+                .replace(/([\w-]+)bottom/, 'bottom');
+  }
+
+  var deviceProperty = functionsToConvert[property];
   var deviceDimention = device[deviceProperty];
   var percent = parseFloat((value/deviceDimention * 100).toFixed(3));
   return percent;
@@ -75,20 +104,26 @@ function init() {
       return;
     }
 
+    var pattern = new RegExp("[^\\-](" + whiteList.join("|").replace('-', '\\-') + ")\\s?\\:\\s?([0-9]+)px", "gi");
+
     // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
-    var changedCSS = data.replace(/[^\-](top|left|bottom|right|width|height)\s?\:\s?([0-9]+)px/gi, function(match, p1, p2, p3) {
+    var changedCSS = data.replace(pattern, function(match, p1, p2, p3) {
+
 
       // clear the whitespace from the properties
       var property = p1.replace(/\s/g, "");
       var value = parseInt(p2);
 
       // replace just the numbers to preserv the text indentation
-      return match.replace(/([0-9])+px/, convert(property, value) + '%');
+      var converedString = match.replace(/([0-9])+px/, convert(property, value) + '%');
+      logme.info(match.red, '\t->\t', converedString.green);
+      return converedString;
     });
 
     fs.writeFile(destinationFile, changedCSS, function (err) {
      if (err) throw err;
-     console.log('Done!', destinationFile + ' was created');
+     logme.info('Done!'.green);
+     logme.info(destinationFile + ' was created'.yellow);
    });
 
   });
