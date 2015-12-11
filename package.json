@@ -1,10 +1,10 @@
 {
   "name": "fixed-to-float",
   "version": "0.0.3",
-  "description": "Convert your fixed layout CSS from pixels to percents",
-  "main": "convertToPercent.js",
+  "description": "Convert your fixed layout CSS from pixels to percentages",
+  "main": "./bin/index.js",
   "bin": {
-    "fixed-to-float": "./bin/index.js"
+    "fixed-to-float": "./bin/fixed-to-float"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,8 +16,10 @@
   "keywords": [
     "CSS",
     "fixed",
-    "percents",
-    "converter"
+    "percentages",
+    "converter",
+    "fluid",
+    "mobile"
   ],
   "author": "Iliyan Betovski",
   "preferGlobal": true,
