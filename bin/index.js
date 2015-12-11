@@ -1,73 +1,95 @@
 #! /usr/bin/env node
 
 var fs = require('fs');
+var prompt = require('prompt');
 
 // put here the screen dimensions.
-var screenWidth = 800;
-var screenHeight = 1280;
+var device = {
+  width: null,
+  height: null
+};
 
 if (process.argv.length <= 3) {
   throw Error('Please enter source and destination files');
 }
 
+prompt.start();
+
+var promptQuestions = {
+
+  properties: {
+    width: {
+      pattern: /^[0-9]+$/,
+      message: 'Just numbers please',
+      description: 'Enter device width',
+      default: 800,
+      required: true
+    },
+    height: {
+      pattern: /^[0-9]+$/,
+      message: 'Just numbers please',
+      description: 'Enter device height',
+      default: 1280,
+      required: true
+    }
+  }
+};
+
+prompt.get(promptQuestions, function(err, results) {
+  if (err) {
+    throw new Error(err);
+    return;
+  }
+
+  device.width = results.width;
+  device.height = results.height;
+
+  init();
+});
+
+
 var sourceFile = process.argv[2];
 var destinationFile = process.argv[3];
 
-var convertors = {
-	width: function(property, value) {
-		// devide element's width by screenWidth
-		var percent = value/screenWidth * 100;
-		// multiply by 100;
-		return property + ':\t' + percent + "%";
-	},
+var functionsToConvert = {
+  width: 'width',
+  left: 'width',
+  right: 'width',
 
-	height: function(property, value) {
-		// devide element's height by screenWidth
-		var percent = value/screenHeight * 100;
-		// multiply by 100;
-		return property + ':\t' + percent + "%";	
-	}
+  height: 'height',
+  top: 'height',
+  bottom: 'height'
 };
 
-var functionsToConvert = {
-	width: 'width',
-	left: 'width',
-	right: 'width',
-
-	height: 'height',
-	top: 'height',
-	bottom: 'height'
+convert = function(property, value) {
+  var deviceProperty = functionsToConvert[property]
+  var deviceDimention = device[deviceProperty];
+  var percent = parseFloat((value/deviceDimention * 100).toFixed(3));
+  return percent;
 }
 
-fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
-  if (err) throw err;
+function init() {
+  fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
+    if (err) {
+      throw new Error(err);
+      return;
+    }
 
-  // we have the css data.
-  // parse the string and find pixels for:
-  //  left:
-  //  right:
-  //  top:
-  //  bottom:
-  //  
-  //  width:
-  //  height:
-  
-  // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
-  var changedCSS = data.replace(/(\s?top|\s?left|\s?bottom|\s?right|\s?width|\s?height)\s?\:\s?([0-9]+)px/gi, function(match, p1, p2, p3) {
+    // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
+    var changedCSS = data.replace(/[^\-](top|left|bottom|right|width|height)\s?\:\s?([0-9]+)px/gi, function(match, p1, p2, p3) {
 
-  	// clear the whitespace from the properties
-  	property = p1.replace(/\s/g, "");
+      // clear the whitespace from the properties
+      var property = p1.replace(/\s/g, "");
+      var value = parseInt(p2);
 
-  	// make the number to be integer.
-  	value = parseInt(p2);
+      // replace just the numbers to preserv the text indentation
+      return match.replace(/([0-9])+px/, convert(property, value) + '%');
+    });
 
-  	return convertors[functionsToConvert[property]](property, value);
+    fs.writeFile(destinationFile, changedCSS, function (err) {
+     if (err) throw err;
+     console.log('Done!', destinationFile + ' was created');
+   });
+
   });
-
-  fs.writeFile(destinationFile, changedCSS, function (err) {
-   if (err) throw err;
-   console.log('Done!', destinationFile + ' was created');
- });
-  
-
-});
+}

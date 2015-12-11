@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/ibetovski/fixed-to-float/issues"
   },
-  "homepage": "https://github.com/ibetovski/fixed-to-float#readme"
+  "homepage": "https://github.com/ibetovski/fixed-to-float#readme",
+  "dependencies": {
+    "prompt": "^0.2.14"
+  }
 }
