@@ -8,14 +8,11 @@ var logme = new Logme({
   theme: 'socket.io'
 });
 
-// put here the screen dimensions.
-var device = {
-  width: null,
-  height: null
-};
+// local dependancies
+var Dimensions = require('../lib/dimensions');
 
 if (process.argv.length <= 3) {
-  throw Error('Please enter source and destination files');
+  return logme.error('Please enter source and destination files');
 }
 
 prompt.start();
@@ -26,19 +23,21 @@ var promptQuestions = {
     width: {
       pattern: /^[0-9]+$/,
       message: 'Just numbers please',
-      description: 'Enter device width',
+      description: 'Enter dimensions width',
       default: 800,
       required: true
     },
     height: {
       pattern: /^[0-9]+$/,
       message: 'Just numbers please',
-      description: 'Enter device height',
+      description: 'Enter dimensions height',
       default: 1280,
       required: true
     }
   }
 };
+
+var dimensions;
 
 prompt.get(promptQuestions, function(err, results) {
   if (err) {
@@ -46,8 +45,10 @@ prompt.get(promptQuestions, function(err, results) {
     return;
   }
 
-  device.width = results.width;
-  device.height = results.height;
+  dimensions = new Dimensions({
+    width: results.width,
+    height: results.height
+  });
 
   init();
 });
@@ -66,36 +67,8 @@ var whiteList = [
   'padding-bottom',
 ];
 
-
 var sourceFile = process.argv[2];
 var destinationFile = process.argv[3];
-
-var functionsToConvert = {
-  width: 'width',
-  left: 'width',
-  right: 'width',
-
-  height: 'height',
-  top: 'height',
-  bottom: 'height'
-};
-
-convert = function(property, value) {
-  // if the property is not in the list with functions
-  //  we check if it contains X or Y names in its name
-  if (typeof functionsToConvert[property] === 'undefined') {
-    property = property
-                .replace(/([\w-]+)left/, 'left')
-                .replace(/([\w-]+)right/, 'right')
-                .replace(/([\w-]+)top/, 'top')
-                .replace(/([\w-]+)bottom/, 'bottom');
-  }
-
-  var deviceProperty = functionsToConvert[property];
-  var deviceDimention = device[deviceProperty];
-  var percent = parseFloat((value/deviceDimention * 100).toFixed(3));
-  return percent;
-}
 
 function init() {
   fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
@@ -109,13 +82,12 @@ function init() {
     // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
     var changedCSS = data.replace(pattern, function(match, p1, p2, p3) {
 
-
       // clear the whitespace from the properties
       var property = p1.replace(/\s/g, "");
       var value = parseInt(p2);
 
       // replace just the numbers to preserv the text indentation
-      var converedString = match.replace(/([0-9])+px/, convert(property, value) + '%');
+      var converedString = match.replace(/([0-9])+px/, dimensions.getPercentages(property, value) + '%');
       logme.info(match.red, '\t->\t', converedString.green);
       return converedString;
     });
