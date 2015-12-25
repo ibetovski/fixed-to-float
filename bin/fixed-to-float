@@ -11,6 +11,17 @@ var logme = new Logme({
 // local dependancies
 var Dimensions = require('../lib/dimensions');
 
+var whiteListFileName = 'fixed-to-float-white-list.json';
+
+// Read/Create whiteList file.
+try {
+  var whiteListContent = fs.readFileSync(whiteListFileName, 'utf8');
+} catch(e) {
+  var exampleFile = __dirname + '/../white-list.example.json';
+  var whiteListContent = fs.readFileSync(exampleFile, 'utf8');
+  fs.writeFileSync('./' + whiteListFileName, whiteListContent);
+}
+
 if (process.argv.length <= 3) {
   return logme.error('Please enter source and destination files');
 }
@@ -18,7 +29,6 @@ if (process.argv.length <= 3) {
 prompt.start();
 
 var promptQuestions = {
-
   properties: {
     width: {
       pattern: /^[0-9]+$/,
@@ -53,24 +63,18 @@ prompt.get(promptQuestions, function(err, results) {
   init();
 });
 
-var whiteList = [
-  'width',
-  'left',
-  'right',
-  'height',
-  'top',
-  'bottom',
-  'margin-top',
-  'margin-left',
-  'padding-top',
-  'padding-left',
-  'padding-bottom',
-];
 
 var sourceFile = process.argv[2];
 var destinationFile = process.argv[3];
 
 function init() {
+  // get configuration file.
+  var whiteList = JSON.parse(whiteListContent);
+
+  logme.info('CSS properties that will be converted'.yellow);
+  logme.info(whiteList);
+  logme.info('You can edit '.yellow + whiteListFileName.red + ' if you like to add/remove properties to be matched and run the script again.'.yellow);
+
   fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
     if (err) {
       throw new Error(err);
@@ -79,7 +83,6 @@ function init() {
 
     var pattern = new RegExp("[^\\-](" + whiteList.join("|").replace('-', '\\-') + ")\\s?\\:\\s?([0-9]+)px", "gi");
 
-    // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
     var changedCSS = data.replace(pattern, function(match, p1, p2, p3) {
 
       // clear the whitespace from the properties
