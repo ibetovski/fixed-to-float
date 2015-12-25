@@ -7,7 +7,7 @@
     "fixed-to-float": "./bin/fixed-to-float"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha specs"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,12 @@
   },
   "homepage": "https://github.com/ibetovski/fixed-to-float#readme",
   "dependencies": {
+    "colors": "^1.1.2",
+    "logme": "^0.4.0",
     "prompt": "^0.2.14"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
   }
 }

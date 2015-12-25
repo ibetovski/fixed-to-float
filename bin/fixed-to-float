@@ -2,21 +2,33 @@
 
 var fs = require('fs');
 var prompt = require('prompt');
+var colors = require('colors');
+var Logme = require('logme').Logme;
+var logme = new Logme({
+  theme: 'socket.io'
+});
 
-// put here the screen dimensions.
-var device = {
-  width: null,
-  height: null
-};
+// local dependancies
+var Dimensions = require('../lib/dimensions');
+
+var whiteListFileName = 'fixed-to-float-white-list.json';
+
+// Read/Create whiteList file.
+try {
+  var whiteListContent = fs.readFileSync(whiteListFileName, 'utf8');
+} catch(e) {
+  var exampleFile = __dirname + '/../white-list.example.json';
+  var whiteListContent = fs.readFileSync(exampleFile, 'utf8');
+  fs.writeFileSync('./' + whiteListFileName, whiteListContent);
+}
 
 if (process.argv.length <= 3) {
-  throw Error('Please enter source and destination files');
+  return logme.error('Please enter source and destination files');
 }
 
 prompt.start();
 
 var promptQuestions = {
-
   properties: {
     width: {
       pattern: /^[0-9]+$/,
@@ -35,14 +47,18 @@ var promptQuestions = {
   }
 };
 
+var dimensions;
+
 prompt.get(promptQuestions, function(err, results) {
   if (err) {
     throw new Error(err);
     return;
   }
 
-  device.width = results.width;
-  device.height = results.height;
+  dimensions = new Dimensions({
+    width: results.width,
+    height: results.height
+  });
 
   init();
 });
@@ -51,44 +67,38 @@ prompt.get(promptQuestions, function(err, results) {
 var sourceFile = process.argv[2];
 var destinationFile = process.argv[3];
 
-var functionsToConvert = {
-  width: 'width',
-  left: 'width',
-  right: 'width',
-
-  height: 'height',
-  top: 'height',
-  bottom: 'height'
-};
-
-convert = function(property, value) {
-  var deviceProperty = functionsToConvert[property]
-  var deviceDimention = device[deviceProperty];
-  var percent = parseFloat((value/deviceDimention * 100).toFixed(3));
-  return percent;
-}
-
 function init() {
+  // get configuration file.
+  var whiteList = JSON.parse(whiteListContent);
+
+  logme.info('CSS properties that will be converted'.yellow);
+  logme.info(whiteList);
+  logme.info('You can edit '.yellow + whiteListFileName.red + ' if you like to add/remove properties to be matched and run the script again.'.yellow);
+
   fs.readFile(sourceFile, {encoding: "UTF8"}, function (err, data) {
     if (err) {
       throw new Error(err);
       return;
     }
 
-    // var result = data.match(/[top|left|right|bottom|width|height](\s+)\:(\s+)px/gi);
-    var changedCSS = data.replace(/[^\-](top|left|bottom|right|width|height)\s?\:\s?([0-9]+)px/gi, function(match, p1, p2, p3) {
+    var pattern = new RegExp("[^\\-](" + whiteList.join("|").replace('-', '\\-') + ")\\s?\\:\\s?([0-9]+)px", "gi");
+
+    var changedCSS = data.replace(pattern, function(match, p1, p2, p3) {
 
       // clear the whitespace from the properties
       var property = p1.replace(/\s/g, "");
       var value = parseInt(p2);
 
       // replace just the numbers to preserv the text indentation
-      return match.replace(/([0-9])+px/, convert(property, value) + '%');
+      var converedString = match.replace(/([0-9])+px/, dimensions.getPercentages(property, value) + '%');
+      logme.info(match.red, '\t->\t', converedString.green);
+      return converedString;
     });
 
     fs.writeFile(destinationFile, changedCSS, function (err) {
      if (err) throw err;
-     console.log('Done!', destinationFile + ' was created');
+     logme.info('Done!'.green);
+     logme.info(destinationFile + ' was created'.yellow);
    });
 
   });
