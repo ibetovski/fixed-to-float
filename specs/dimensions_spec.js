@@ -6,7 +6,7 @@ var dimensions = new Dimensions({
 });
 
 describe('Dimensions', function() {
-  it('should has dimentions', function() {
+  it('should has dimensions', function() {
     var dimensions = new Dimensions({
       width: 300,
       height: 500
@@ -16,7 +16,7 @@ describe('Dimensions', function() {
     expect(dimensions.height).to.equal(500);
   });
 
-  it('should has defalt dementions', function() {
+  it('should has defalt dimensions', function() {
     var dimensions = new Dimensions();
 
     expect(dimensions.width).to.equal(800);

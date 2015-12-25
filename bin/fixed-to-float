@@ -33,14 +33,14 @@ var promptQuestions = {
     width: {
       pattern: /^[0-9]+$/,
       message: 'Just numbers please',
-      description: 'Enter dimensions width',
+      description: 'Enter device width',
       default: 800,
       required: true
     },
     height: {
       pattern: /^[0-9]+$/,
       message: 'Just numbers please',
-      description: 'Enter dimensions height',
+      description: 'Enter device height',
       default: 1280,
       required: true
     }
