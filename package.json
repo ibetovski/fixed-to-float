@@ -1,6 +1,6 @@
 {
   "name": "fixed-to-float",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Convert your fixed layout CSS from pixels to percentages",
   "main": "./bin/index.js",
   "bin": {
